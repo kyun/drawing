@@ -27,10 +27,13 @@ function Canvas() {
   const [img, setImg] = React.useState('');
   const [v, setV] = React.useState(1);
   const [edge, setEdge] = React.useState([0, 0]);
+  const [count, setCount] = React.useState(0);
+  const [color, setColor] = React.useState('#ff0000');
   let pos = {
     drawable: false,
     X: -1,
     Y: -1,
+    count: 0,
   }
   function initCanvas() {
     const origin = originRef.current;
@@ -38,9 +41,8 @@ function Canvas() {
     ctx!.imageSmoothingEnabled = false;
     let imageObj = new Image();
     imageObj.setAttribute('crossOrigin', 'anonymous');
-    imageObj.src = `https://upload.wikimedia.org/wikipedia/commons/e/ea/Redmi_note_9s_.webp`;
-    imageObj.src = 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/b9821bf8-6e6a-4855-ba34-35144c74a205/d8l6neu-50154af3-45ee-4a87-ab2e-8facb5c3b6d0.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3sicGF0aCI6IlwvZlwvYjk4MjFiZjgtNmU2YS00ODU1LWJhMzQtMzUxNDRjNzRhMjA1XC9kOGw2bmV1LTUwMTU0YWYzLTQ1ZWUtNGE4Ny1hYjJlLThmYWNiNWMzYjZkMC5qcGcifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6ZmlsZS5kb3dubG9hZCJdfQ.9Lf6b5zwgtKGdSsFLPPh3OAirqOZ1j1IyJTsip-AcLQ';
 
+    imageObj.src = 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/b9821bf8-6e6a-4855-ba34-35144c74a205/d8l6neu-50154af3-45ee-4a87-ab2e-8facb5c3b6d0.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3sicGF0aCI6IlwvZlwvYjk4MjFiZjgtNmU2YS00ODU1LWJhMzQtMzUxNDRjNzRhMjA1XC9kOGw2bmV1LTUwMTU0YWYzLTQ1ZWUtNGE4Ny1hYjJlLThmYWNiNWMzYjZkMC5qcGcifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6ZmlsZS5kb3dubG9hZCJdfQ.9Lf6b5zwgtKGdSsFLPPh3OAirqOZ1j1IyJTsip-AcLQ';
     imageObj.onload = function () {
       console.log('??????')
       ctx?.drawImage(imageObj, 0, 0, imageObj.width, imageObj.height);
@@ -113,11 +115,10 @@ function Canvas() {
     const origin = originRef.current;
     const ctx = canvas?.getContext('2d');
     const ctx2 = origin?.getContext('2d');
-
     if (pos.drawable) {
-      pos = { ...pos, ...getPosition(e.nativeEvent) }
+      pos = { ...pos, ...getPosition(e.nativeEvent), count: pos.count+1 }
       ctx!.fillStyle = '#ffff00';
-      ctx2!.fillStyle = "#ff0000";
+      ctx2!.fillStyle = color;
       ctx?.fillRect(~~((pos.X-1) / 16) * 16, ~~((pos.Y-1) / 16) * 16, 16, 16);
       ctx2?.fillRect(~~((pos.X-1)/16) + edge[0], ~~((pos.Y-1)/16) + edge[1], 1, 1);
 
@@ -128,8 +129,8 @@ function Canvas() {
   };
   function finishDraw() {
     const canvas = originRef.current;
-
-    pos = { drawable: false, X: -1, Y: -1 }
+    setCount(count+pos.count);
+    pos = { drawable: false, X: -1, Y: -1, count: 0 }
     const src = canvas!.toDataURL('image/png');
     setImg(src);
   }
@@ -141,7 +142,7 @@ function Canvas() {
     const ctx2 = origin?.getContext('2d');
 
     ctx!.beginPath();
-    pos = { drawable: true, ...getPosition(e.nativeEvent)}
+    pos = { ...pos, drawable: true, ...getPosition(e.nativeEvent)}
     ctx!.moveTo(pos.X, pos.Y);
 
     ctx2!.beginPath();
@@ -217,7 +218,9 @@ function Canvas() {
   return (
     <Base>
       <div>
-      <p>{edge[0]},{edge[1]}</p>
+        <p>{edge[0]},{edge[1]}</p>
+        <h2>{count}</h2>
+        <input type="text" value={color} onChange={(e)=>setColor(e.target.value)} />
       <canvas ref={originRef} width={800} height={800} style={{ display: 'none' }} />
       <button onClick={() => setV(1)}>1</button>
 
